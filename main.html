@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .calculator-container {
+            display: flex;
+        }
+
+        .calculator {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-right: 20px;
+        }
+
+        .history-container {
+            width: 200px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+
+        .button {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .button:hover {
+            background-color: #ddd;
+        }
+
+        .number-button {
+            font-size: 24px;
+        }
+
+        #result {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        #history-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #history-list li {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+        @media (max-width: 600px) {
+            .calculator {
+                width: 90%;
+                max-width: none;
+            }
+
+            .history-container {
+                width: 90%;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator">
+            <label for="expression">Enter your expression:</label>
+
+            <!--Guidelines of text area is implemented with rows, columns, placeholder, minlength and maxlength-->
+
+            <textarea id="expression" name="expression" rows="4" cols="25" placeholder="Enter your expression here..."
+                minlength="1" maxlength="50" required></textarea>
+            <div class="button-container">
+
+                <!--Guidelines of icons is implemented with aria-label onclick functions-->
+                <button class="button number-button" aria-label="Append 1" onclick="appendToExpression('1')">1</button>
+                <button class="button number-button" aria-label="Append 2" onclick="appendToExpression('2')">2</button>
+                <button class="button number-button" aria-label="Append 3" onclick="appendToExpression('3')">3</button>
+                <button class="button number-button" aria-label="Append 4" onclick="appendToExpression('4')">4</button>
+                <button class="button number-button" aria-label="Append 5" onclick="appendToExpression('5')">5</button>
+                <button class="button number-button" aria-label="Append 6" onclick="appendToExpression('6')">6</button>
+                <button class="button number-button" aria-label="Append 7" onclick="appendToExpression('7')">7</button>
+                <button class="button number-button" aria-label="Append 8" onclick="appendToExpression('8')">8</button>
+                <button class="button number-button" aria-label="Append 9" onclick="appendToExpression('9')">9</button>
+                <button class="button number-button" aria-label="Append 0" onclick="appendToExpression('0')">0</button>
+                <button class="button" aria-label="Append Plus" onclick="appendToExpression('+')">+</button>
+                <button class="button" aria-label="Append Minus" onclick="appendToExpression('-')">-</button>
+                <button class="button" aria-label="Append Multiply" onclick="appendToExpression('*')">*</button>
+                <button class="button" aria-label="Append Divide" onclick="appendToExpression('/')">/</button>
+                <button class="button" aria-label="Clear" onclick="clearExpression()"><i class="fas fa-backspace"></i></button>
+                <button class="button" aria-label="Calculate" onclick="calculate()"><i class="fas fa-equals"></i></button>
+            </div>
+        </div>
+        <div class="history-container">
+            <h3>History:</h3>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        let history = [];
+        const expressionField = document.getElementById('expression');
+        const historyList = document.getElementById('history-list');
+
+        function appendToExpression(value) {
+            expressionField.value += value;
+        }
+
+        function clearExpression() {
+            expressionField.value = '';
+        }
+
+        function backspace() {
+            expressionField.value = expressionField.value.slice(0, -1);
+        }
+
+        function calculate() {
+            try {
+                const expression = expressionField.value;
+                const result = eval(expression);
+                if (isNaN(result) || !isFinite(result)) {
+                    throw new Error('Invalid input');
+                }
+                expressionField.value = result;
+                addToHistory(expression, result);
+            } catch (error) {
+                expressionField.value = 'Error';
+            }
+        }
+
+        function addToHistory(expression, result) {
+            if (history.length >= 10) {
+                history.shift();
+            }
+            history.push({ expression, result });
+            historyList.innerHTML = '';
+            history.forEach((item) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${item.expression} = ${item.result}`;
+                historyList.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+</html>
